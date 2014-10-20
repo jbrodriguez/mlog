@@ -1,0 +1,1 @@
+A simple logging module for go, with a rotating file feature and console logging.
