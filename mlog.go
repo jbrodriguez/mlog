@@ -130,10 +130,8 @@ func doLogging(logLevel int32, fileName string) {
 	warnHandle := ioutil.Discard
 	errorHandle := ioutil.Discard
 	fatalHandle := ioutil.Discard
-	fileHandle, err := NewRotatingFileHandler(fileName, 1024*1024*1024, 10)
-	if err != nil {
-		log.Fatal("something went really wrong: ", err)
-	}
+
+	var fileHandle *RotatingFileHandler
 
 	if logLevel&LevelTrace != 0 {
 		traceHandle = os.Stdout
@@ -162,6 +160,12 @@ func doLogging(logLevel int32, fileName string) {
 	}
 
 	if fileName != "" {
+		var err error
+		fileHandle, err = NewRotatingFileHandler(fileName, 1024*1024*1024, 10)
+		if err != nil {
+			log.Fatal("mlog: unable to create RotatingFileHandler: ", err)
+		}
+
 		if traceHandle == os.Stdout {
 			traceHandle = io.MultiWriter(fileHandle, traceHandle)
 		}
@@ -226,6 +230,8 @@ func Error(err error) {
 // Warning writes to the Warning destination
 func Fatalf(format string, a ...interface{}) {
 	logger.Fatal.Output(2, fmt.Sprintf(format, a...))
-	logger.LogFile.fd.Sync()
+	if logger.LogFile != nil {
+		logger.LogFile.fd.Sync()
+	}
 	os.Exit(255)
 }
