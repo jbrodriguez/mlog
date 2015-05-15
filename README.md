@@ -46,5 +46,5 @@ func main() {
 
 ```
 I: 2015/05/15 07:09:45 main.go:10: Hello World !
-I: 2015/05/15 07:09:45 main.go:13: Lorem ipsum
+W: 2015/05/15 07:09:45 main.go:13: Lorem ipsum
 ```
