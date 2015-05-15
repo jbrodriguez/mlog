@@ -45,5 +45,6 @@ func main() {
 ## Output
 
 ```
-I: 2015/05/15 07:09:45 boot.go:50: mediabase v0.3.4-159.1121ef0 starting up on darwin ...
+I: 2015/05/15 07:09:45 main.go:10: Hello World !
+I: 2015/05/15 07:09:45 main.go:13: Lorem ipsum
 ```
