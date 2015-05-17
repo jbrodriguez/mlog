@@ -121,7 +121,11 @@ func Start(level int32, path string) {
 }
 
 func Stop() error {
-	return logger.LogFile.Close()
+	if logger.LogFile != nil {
+		return logger.LogFile.Close()
+	}
+
+	return nil
 }
 
 func doLogging(logLevel int32, fileName string) {
@@ -227,7 +231,7 @@ func Error(err error) {
 	logger.Error.Output(2, fmt.Sprintf("%s\n", err))
 }
 
-// Warning writes to the Warning destination
+// Fatalf writes to the Fatal destination and exits with an error code
 func Fatalf(format string, a ...interface{}) {
 	logger.Fatal.Output(2, fmt.Sprintf(format, a...))
 	if logger.LogFile != nil {
