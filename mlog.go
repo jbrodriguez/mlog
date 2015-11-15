@@ -10,18 +10,20 @@ import (
 	"sync/atomic"
 )
 
+type LogLevel int32
+
 const (
 	// LevelTrace logs everything
-	LevelTrace int32 = 1
+	LevelTrace LogLevel = (1<<iota)
 
 	// LevelInfo logs Info, Warnings and Errors
-	LevelInfo int32 = 2
+	LevelInfo
 
 	// LevelWarn logs Warning and Errors
-	LevelWarn int32 = 4
+	LevelWarn
 
 	// LevelError logs just Errors
-	LevelError int32 = 8
+	LevelError
 )
 
 type mlog struct {
@@ -116,7 +118,7 @@ func (h *RotatingFileHandler) doRollover() {
 	}
 }
 
-func Start(level int32, path string) {
+func Start(level LogLevel, path string) {
 	doLogging(level, path)
 }
 
@@ -128,7 +130,7 @@ func Stop() error {
 	return nil
 }
 
-func doLogging(logLevel int32, fileName string) {
+func doLogging(logLevel LogLevel, fileName string) {
 	traceHandle := ioutil.Discard
 	infoHandle := ioutil.Discard
 	warnHandle := ioutil.Discard
@@ -136,29 +138,18 @@ func doLogging(logLevel int32, fileName string) {
 	fatalHandle := ioutil.Discard
 
 	var fileHandle *RotatingFileHandler
-
-	if logLevel&LevelTrace != 0 {
+	
+	switch logLevel {
+	case LevelTrace :
 		traceHandle = os.Stdout
+		fallthrough
+	case LevelInfo:
 		infoHandle = os.Stdout
+		fallthrough
+	case LevelWarn:
 		warnHandle = os.Stdout
-		errorHandle = os.Stderr
-		fatalHandle = os.Stderr
-	}
-
-	if logLevel&LevelInfo != 0 {
-		infoHandle = os.Stdout
-		warnHandle = os.Stdout
-		errorHandle = os.Stderr
-		fatalHandle = os.Stderr
-	}
-
-	if logLevel&LevelWarn != 0 {
-		warnHandle = os.Stdout
-		errorHandle = os.Stderr
-		fatalHandle = os.Stderr
-	}
-
-	if logLevel&LevelError != 0 {
+		fallthrough
+	case LevelError:
 		errorHandle = os.Stderr
 		fatalHandle = os.Stderr
 	}
@@ -200,7 +191,7 @@ func doLogging(logLevel int32, fileName string) {
 		LogFile: fileHandle,
 	}
 
-	atomic.StoreInt32(&logger.LogLevel, logLevel)
+	atomic.StoreInt32(&logger.LogLevel, int32(logLevel))
 }
 
 //** TRACE
