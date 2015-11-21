@@ -230,3 +230,10 @@ func Fatalf(format string, a ...interface{}) {
 	}
 	os.Exit(255)
 }
+
+// Shortcut function to log if error
+func LogIfError(err error) {
+	if err != nil {
+		Error(err)
+	}
+}
