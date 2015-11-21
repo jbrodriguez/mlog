@@ -234,6 +234,6 @@ func Fatalf(format string, a ...interface{}) {
 // Shortcut function to log if error
 func LogIfError(err error) {
 	if err != nil {
-		Error(err.Error())
+		Error(err)
 	}
 }
