@@ -1,3 +1,5 @@
+// Package mlog is simple logging module for go, with a rotating file feature
+// and console logging.
 package mlog
 
 import (
@@ -10,11 +12,12 @@ import (
 	"sync/atomic"
 )
 
+// LogLevel type
 type LogLevel int32
 
 const (
 	// LevelTrace logs everything
-	LevelTrace LogLevel = (1<<iota)
+	LevelTrace LogLevel = (1 << iota)
 
 	// LevelInfo logs Info, Warnings and Errors
 	LevelInfo
@@ -52,6 +55,7 @@ type RotatingFileHandler struct {
 	backupCount int
 }
 
+// NewRotatingFileHandler creates dirs and opens the logfile
 func NewRotatingFileHandler(fileName string, maxBytes int, backupCount int) (*RotatingFileHandler, error) {
 	dir := path.Dir(fileName)
 	os.Mkdir(dir, 0777)
@@ -80,6 +84,7 @@ func (h *RotatingFileHandler) Write(p []byte) (n int, err error) {
 	return h.fd.Write(p)
 }
 
+// Close simply closes the File
 func (h *RotatingFileHandler) Close() error {
 	if h.fd != nil {
 		return h.fd.Close()
@@ -118,16 +123,27 @@ func (h *RotatingFileHandler) doRollover() {
 	}
 }
 
+// Start starts the logging
 func Start(level LogLevel, path string) {
 	doLogging(level, path)
 }
 
+// Stop stops the logging
 func Stop() error {
 	if logger.LogFile != nil {
 		return logger.LogFile.Close()
 	}
 
 	return nil
+}
+
+//Sync commits the current contents of the file to stable storage.
+//Typically, this means flushing the file system's in-memory copy
+//of recently written data to disk.
+func Sync() {
+	if logger.LogFile != nil {
+		logger.LogFile.fd.Sync()
+	}
 }
 
 func doLogging(logLevel LogLevel, fileName string) {
@@ -138,9 +154,9 @@ func doLogging(logLevel LogLevel, fileName string) {
 	fatalHandle := ioutil.Discard
 
 	var fileHandle *RotatingFileHandler
-	
+
 	switch logLevel {
-	case LevelTrace :
+	case LevelTrace:
 		traceHandle = os.Stdout
 		fallthrough
 	case LevelInfo:
@@ -222,18 +238,35 @@ func Error(err error) {
 	logger.Error.Output(2, fmt.Sprintf("%s\n", err))
 }
 
-// Fatalf writes to the Fatal destination and exits with an error code
-func Fatalf(format string, a ...interface{}) {
-	logger.Fatal.Output(2, fmt.Sprintf(format, a...))
-	if logger.LogFile != nil {
-		logger.LogFile.fd.Sync()
+// IfError is a shortcut function for log.Error if error
+func IfError(err error) {
+	if err != nil {
+		logger.Error.Output(2, fmt.Sprintf("%s\n", err))
 	}
+}
+
+//** FATAL
+
+// Fatal writes to the Fatal destination and exits with an error 255 code
+func Fatal(a ...interface{}) {
+	logger.Fatal.Output(2, fmt.Sprint(a...))
+	Sync()
 	os.Exit(255)
 }
 
-// Shortcut function to log if error
-func LogIfError(err error) {
+// Fatalf writes to the Fatal destination and exits with an error 255 code
+func Fatalf(format string, a ...interface{}) {
+	logger.Fatal.Output(2, fmt.Sprintf(format, a...))
+	Sync()
+	os.Exit(255)
+}
+
+// FatalIfError is a shortcut function for log.Fatalf if error and
+// exits with an error 255 code
+func FatalIfError(err error) {
 	if err != nil {
-		Error(err)
+		logger.Fatal.Output(2, fmt.Sprintf("%s\n", err))
+		Sync()
+		os.Exit(255)
 	}
 }

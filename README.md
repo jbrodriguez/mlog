@@ -7,12 +7,10 @@ go get github.com/jbrodriguez/mlog
 Sample usage
 
 Write to stdout/stderr and create a rotating logfile
-```
+```go
 package main
 
-import (
-	"github.com/jbrodriguez/mlog"
-)
+import "github.com/jbrodriguez/mlog"
 
 func main() {
 	mlog.Start(mlog.LevelInfo, "app.log")
@@ -25,12 +23,10 @@ func main() {
 ```
 
 Write to stdout/stderr only
-```
+```go
 package main
 
-import (
-	"github.com/jbrodriguez/mlog"
-)
+import "github.com/jbrodriguez/mlog"
 
 func main() {
 	mlog.Start(mlog.LevelInfo, "")
