@@ -29,6 +29,9 @@ const (
 	LevelError
 )
 
+const MaxBytes int = 10 * 1024 * 1024
+const BackupCount int = 10
+
 type mlog struct {
 	LogLevel int32
 
@@ -125,7 +128,11 @@ func (h *RotatingFileHandler) doRollover() {
 
 // Start starts the logging
 func Start(level LogLevel, path string) {
-	doLogging(level, path)
+	doLogging(level, path, MaxBytes, BackupCount)
+}
+
+func StartEx(level LogLevel, path string, maxBytes, backupCount int) {
+	doLogging(level, path, maxBytes, backupCount)
 }
 
 // Stop stops the logging
@@ -146,7 +153,7 @@ func Sync() {
 	}
 }
 
-func doLogging(logLevel LogLevel, fileName string) {
+func doLogging(logLevel LogLevel, fileName string, maxBytes, backupCount int) {
 	traceHandle := ioutil.Discard
 	infoHandle := ioutil.Discard
 	warnHandle := ioutil.Discard
@@ -172,7 +179,7 @@ func doLogging(logLevel LogLevel, fileName string) {
 
 	if fileName != "" {
 		var err error
-		fileHandle, err = NewRotatingFileHandler(fileName, 1024*1024*1024, 10)
+		fileHandle, err = NewRotatingFileHandler(fileName, maxBytes, backupCount)
 		if err != nil {
 			log.Fatal("mlog: unable to create RotatingFileHandler: ", err)
 		}
