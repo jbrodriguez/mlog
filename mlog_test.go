@@ -62,6 +62,43 @@ func TestError(t *testing.T) {
 	Stop()
 }
 
+func TestStartEx(t *testing.T) {
+	path := "./test"
+	os.RemoveAll(path)
+
+	os.Mkdir(path, 0777)
+	fileName := path + "/startex"
+
+	StartEx(LevelInfo, fileName, 10, 2)
+
+	Info("Test 1")
+	Info("Test 2")
+
+	if _, err := os.Stat(fileName + ".1"); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(fileName + ".2"); err == nil {
+		t.Fatal(err)
+	}
+
+	Info("Test 3")
+
+	if _, err := os.Stat(fileName + ".2"); err != nil {
+		t.Fatal(err)
+	}
+
+	Info("Test 4")
+
+	if _, err := os.Stat(fileName + ".3"); err == nil {
+		t.Fatal(err)
+	}
+
+	Stop()
+
+	os.RemoveAll(path)
+}
+
 func TestRotatingFileHandler(t *testing.T) {
 	path := "./test_log"
 	os.RemoveAll(path)
