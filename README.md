@@ -38,6 +38,27 @@ func main() {
 }
 ```
 
+By default, the log will be rolled over to a backup file when its size reaches 10Mb and 10 such files will be created (and eventually reused).
+
+Alternatively, you can specify the max size of the log file before it gets rotated, and the number of backup files you want to create, with the StartEx function.
+
+```go
+package main
+
+import "github.com/jbrodriguez/mlog"
+
+func main() {
+    mlog.StartEx(mlog.LevelInfo, "app.log", 5*1024*1024, 5)
+
+    mlog.Info("Hello World !")
+
+    ipsum := "ipsum"
+    mlog.Warning("Lorem %s", ipsum)
+}
+```
+This will rotate the file when it reaches 5Mb and 5 backup files will eventually be created.
+
+
 ## Output
 
 ```
