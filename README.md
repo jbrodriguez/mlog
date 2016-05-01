@@ -58,6 +58,10 @@ func main() {
 ```
 This will rotate the file when it reaches 5Mb and 5 backup files will eventually be created.
 
+Setting logger flags:
+```go
+mlog.DefaultFlags = log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile
+```
 
 ## Output
 
