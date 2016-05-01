@@ -46,6 +46,9 @@ type mlog struct {
 
 var logger mlog
 
+// DefaultFlags used by created loggers
+var DefaultFlags = log.Ldate | log.Ltime | log.Lshortfile
+
 //RotatingFileHandler writes log a file, if file size exceeds maxBytes,
 //it will backup current file and open a new one.
 //
@@ -206,11 +209,11 @@ func doLogging(logLevel LogLevel, fileName string, maxBytes, backupCount int) {
 	}
 
 	logger = mlog{
-		Trace:   log.New(traceHandle, "T: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Info:    log.New(infoHandle, "I: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Warning: log.New(warnHandle, "W: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Error:   log.New(errorHandle, "E: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Fatal:   log.New(errorHandle, "F: ", log.Ldate|log.Ltime|log.Lshortfile),
+		Trace:   log.New(traceHandle, "T: ", DefaultFlags),
+		Info:    log.New(infoHandle, "I: ", DefaultFlags),
+		Warning: log.New(warnHandle, "W: ", DefaultFlags),
+		Error:   log.New(errorHandle, "E: ", DefaultFlags),
+		Fatal:   log.New(errorHandle, "F: ", DefaultFlags),
 		LogFile: fileHandle,
 	}
 
