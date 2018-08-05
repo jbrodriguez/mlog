@@ -44,7 +44,10 @@ type mlog struct {
 	LogFile *RotatingFileHandler
 }
 
-var logger mlog
+var Logger mlog
+
+// DefaultFlags used by created loggers
+var DefaultFlags = log.Ldate | log.Ltime | log.Lshortfile
 
 //RotatingFileHandler writes log a file, if file size exceeds maxBytes,
 //it will backup current file and open a new one.
@@ -137,8 +140,8 @@ func StartEx(level LogLevel, path string, maxBytes, backupCount int) {
 
 // Stop stops the logging
 func Stop() error {
-	if logger.LogFile != nil {
-		return logger.LogFile.Close()
+	if Logger.LogFile != nil {
+		return Logger.LogFile.Close()
 	}
 
 	return nil
@@ -148,8 +151,8 @@ func Stop() error {
 //Typically, this means flushing the file system's in-memory copy
 //of recently written data to disk.
 func Sync() {
-	if logger.LogFile != nil {
-		logger.LogFile.fd.Sync()
+	if Logger.LogFile != nil {
+		Logger.LogFile.fd.Sync()
 	}
 }
 
@@ -205,50 +208,50 @@ func doLogging(logLevel LogLevel, fileName string, maxBytes, backupCount int) {
 		}
 	}
 
-	logger = mlog{
-		Trace:   log.New(traceHandle, "T: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Info:    log.New(infoHandle, "I: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Warning: log.New(warnHandle, "W: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Error:   log.New(errorHandle, "E: ", log.Ldate|log.Ltime|log.Lshortfile),
-		Fatal:   log.New(errorHandle, "F: ", log.Ldate|log.Ltime|log.Lshortfile),
+	Logger = mlog{
+		Trace:   log.New(traceHandle, "T: ", DefaultFlags),
+		Info:    log.New(infoHandle, "I: ", DefaultFlags),
+		Warning: log.New(warnHandle, "W: ", DefaultFlags),
+		Error:   log.New(errorHandle, "E: ", DefaultFlags),
+		Fatal:   log.New(errorHandle, "F: ", DefaultFlags),
 		LogFile: fileHandle,
 	}
 
-	atomic.StoreInt32(&logger.LogLevel, int32(logLevel))
+	atomic.StoreInt32(&Logger.LogLevel, int32(logLevel))
 }
 
 //** TRACE
 
 // Trace writes to the Trace destination
 func Trace(format string, a ...interface{}) {
-	logger.Trace.Output(2, fmt.Sprintf(format, a...))
+	Logger.Trace.Output(2, fmt.Sprintf(format, a...))
 }
 
 //** INFO
 
 // Info writes to the Info destination
 func Info(format string, a ...interface{}) {
-	logger.Info.Output(2, fmt.Sprintf(format, a...))
+	Logger.Info.Output(2, fmt.Sprintf(format, a...))
 }
 
 //** WARNING
 
 // Warning writes to the Warning destination
 func Warning(format string, a ...interface{}) {
-	logger.Warning.Output(2, fmt.Sprintf(format, a...))
+	Logger.Warning.Output(2, fmt.Sprintf(format, a...))
 }
 
 //** ERROR
 
 // Error writes to the Error destination and accepts an err
 func Error(err error) {
-	logger.Error.Output(2, fmt.Sprintf("%s\n", err))
+	Logger.Error.Output(2, fmt.Sprintf("%s\n", err))
 }
 
 // IfError is a shortcut function for log.Error if error
 func IfError(err error) {
 	if err != nil {
-		logger.Error.Output(2, fmt.Sprintf("%s\n", err))
+		Logger.Error.Output(2, fmt.Sprintf("%s\n", err))
 	}
 }
 
@@ -256,14 +259,14 @@ func IfError(err error) {
 
 // Fatal writes to the Fatal destination and exits with an error 255 code
 func Fatal(a ...interface{}) {
-	logger.Fatal.Output(2, fmt.Sprint(a...))
+	Logger.Fatal.Output(2, fmt.Sprint(a...))
 	Sync()
 	os.Exit(255)
 }
 
 // Fatalf writes to the Fatal destination and exits with an error 255 code
 func Fatalf(format string, a ...interface{}) {
-	logger.Fatal.Output(2, fmt.Sprintf(format, a...))
+	Logger.Fatal.Output(2, fmt.Sprintf(format, a...))
 	Sync()
 	os.Exit(255)
 }
@@ -272,7 +275,7 @@ func Fatalf(format string, a ...interface{}) {
 // exits with an error 255 code
 func FatalIfError(err error) {
 	if err != nil {
-		logger.Fatal.Output(2, fmt.Sprintf("%s\n", err))
+		Logger.Fatal.Output(2, fmt.Sprintf("%s\n", err))
 		Sync()
 		os.Exit(255)
 	}
